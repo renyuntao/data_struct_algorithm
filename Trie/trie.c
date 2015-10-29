@@ -97,26 +97,29 @@ int search(trie_t *pTrie,char key[])
 	return (0 != pCrawl && pCrawl->value);
 }
 
-void destroyTrie(trie_node_t *root)
+void destroyTrie(trie_node_t **root)
 {
-	trie_node_t *pCrawl = root;
-	for(int i = 0;i < ALPHABET_SIZE;++i)   //free children
+	if(root != NULL && *root != NULL)
 	{
-		if(pCrawl->children[i])   //not null
+		trie_node_t *tmp = *root;
+		for(int i = 0;i < ALPHABET_SIZE;++i)
 		{
-			if(pCrawl->children[i]->value != 0)   //end
+			if(tmp->children[i])   //not null
 			{
-				free(pCrawl->children[i]);
-				pCrawl->children[i] = NULL;
-			}
-			else     //not the end
-			{
-				destroyTrie(pCrawl->children[i]);
+				if(tmp->children[i]->value != 0)   //end
+				{
+					free(tmp->children[i]);
+					tmp->children[i] = NULL;
+				}
+				else   //not the end
+				{
+					destroyTrie(&(tmp->children[i]));
+				}
 			}
 		}
+		free(*root);
+		*root = NULL;
 	}
-	free(root);   //free itself
-	root = NULL;
 }
 
 // Driver
@@ -142,6 +145,6 @@ int main()
 	printf("%s --- %s\n","thaw",output[search(&trie,"thaw")]);
 
 	// Destroy Trie
-	destroyTrie(trie.root);   
+	destroyTrie(&trie.root);   
 	return 0;
 }
